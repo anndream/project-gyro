@@ -1,0 +1,13 @@
+div.profile-page {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+}
+
+div.profile-page > .profile {
+    
+}
+
+div.profile-page > .profile > img {
+    width: 48px;
+    border-radius: 50%;
+}

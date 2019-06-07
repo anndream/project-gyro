@@ -3,13 +3,13 @@
         "public": "public",
         "rewrites": [
             {
-                "source": "**",
+                "source": "!/@(js|css)/**",
                 "function": "app"
             }
         ],
         "ignore": [
             "firebase.json",
-            "**/node_modules/**" 
+            "**/node_modules/**"
         ]
     }
 }
