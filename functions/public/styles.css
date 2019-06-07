@@ -1,3 +1,12 @@
+@import 'header.css';
+
 body {
     font-family: 'Nunito Sans', sans-serif;
+    margin: 0px;
+    padding: 0px;
+}
+
+div.container {
+    margin: 0px auto;
+    width: 80%;
 }

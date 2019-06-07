@@ -1,0 +1,20 @@
+{
+    "name": "project-gyro",
+    "version": "1.0.0",
+    "description": "A imgur clone",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "firebase serve",
+        "publish": "firebase deploy"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/kaleidawave/project-gyro.git"
+    },
+    "author": "kaleidawave",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/kaleidawave/project-gyro/issues"
+    },
+    "homepage": "https://github.com/kaleidawave/project-gyro#readme"
+}

@@ -5,7 +5,7 @@ const admin = require('firebase-admin');
 const express = require('express');
 const cors = require('cors');
 
-const App = require('./src/App.svelte').default;
+
 
 function buildHtml(html, head) {
     return `<!DOCTYPE html>
@@ -16,6 +16,11 @@ function buildHtml(html, head) {
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
         <link href="https://fonts.googleapis.com/css?family=Nunito+Sans:200,400&display=swap" rel="stylesheet">
         <link rel="stylesheet" type="text/css" href="styles.css">
+        <script src="/__/firebase/6.1.1/firebase-app.js"></script>
+        <script>
+            const firebaseConfig = { apiKey: "AIzaSyBmJIhDo8W76jzF6GgvwqQ0HAycRuGVF9A", authDomain: "project-gyro.firebaseapp.com", databaseURL: "https://project-gyro.firebaseio.com", projectId: "project-gyro", storageBucket: "project-gyro.appspot.com", messagingSenderId: "99361186654", appId: "1:99361186654:web:534ea35f0038d280" };
+            firebase.initializeApp(firebaseConfig);
+        </script>
         <title>Project Gyro</title>
         ${head}
     </head>
@@ -25,7 +30,7 @@ function buildHtml(html, head) {
     </html>`;
 }
 
-const app = express();
+const server = express();
 const serviceAccount = require("./project-gyro-admin-key.json");
 
 admin.initializeApp({
@@ -35,14 +40,16 @@ admin.initializeApp({
 
 const firestore = admin.firestore();
 
+const Home = require('./src/pages/Home.svelte').default;
+
 // Automatically allow cross-origin requests
-app.use(cors({ origin: true }));
+server.use(cors({ origin: true }));
 
-app.use(express.static('public'));
+server.use(express.static('public'));
 
-app.get('/', function (req, res) {
-    const { html, head } = App.render({ world: 'World' });
+server.get('/', function (req, res) {
+    const { html, head } = Home.render();
     res.send(buildHtml(html, head));
 });
 
-exports.app = functions.https.onRequest(app);
+exports.app = functions.https.onRequest(server);
