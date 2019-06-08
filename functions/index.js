@@ -45,8 +45,10 @@ const firestore = admin.firestore();
 
 const Home = require('./src/pages/Home.svelte').default;
 const User = require('./src/pages/User.svelte').default;
+const Users = require('./src/pages/Users.svelte').default;
 const Submit = require('./src/pages/Submit.svelte').default;
 const Post = require('./src/pages/Post.svelte').default;
+const _404 = require('./src/pages/404.svelte').default;
 
 // Automatically allow cross-origin requests
 server.use(cors({ origin: true }));
@@ -61,6 +63,12 @@ server.get('/submit', function (req, res) {
     res.send(buildHtml(html, head));
 });
 
+server.get('/users', async function (req, res) {
+    const page = Math.abs(req.query.page)  || 1;
+    const users = await firestore.collection('users').limit(10).offset((page - 1) * 10).get().then(r => r.docs.map(doc => doc.data()));
+    const { html, head } = Users.render({users, page: page});
+    res.send(buildHtml(html, head));
+});
 
 server.get('/user/:username', async function (req, res) {
     let profile = null;
@@ -69,13 +77,14 @@ server.get('/user/:username', async function (req, res) {
         const queries = await firestore.collection('users').where('username', '==', req.params.username).get();
         posts = await firestore.collection('posts').where('author', '==', req.params.username)
             .limit(5).get().
-            then(col => col.docs.map(doc => {return {...doc.data(), id: doc.id}}));
+            then(col => col.docs.map(doc => { return { ...doc.data(), id: doc.id } }));
 
         profile = queries.docs[0].data();
-    }
-    finally {
         const { html, head } = User.render({ ...profile, posts, url: `${req.protocol}://${req.get('host')}${req.originalUrl}` });
         res.send(buildHtml(html, head));
+    }
+    catch {
+        res.status(404).send(buildHtml(_404.render().html, ''));
     }
 });
 
@@ -83,11 +92,16 @@ server.get('/post/:id', async function (req, res) {
     let post = null;
     try {
         post = await firestore.collection('posts').doc(req.params.id).get().then(doc => doc.data());
-    }
-    finally {
         const { html, head } = Post.render({ ...post, url: `${req.protocol}://${req.get('host')}${req.originalUrl}` });
         res.send(buildHtml(html, head));
     }
+    catch {
+        res.status(404).send(buildHtml(_404.render().html, ''));
+    }
+});
+
+server.get('*', function (req, res) {
+    res.status(404).send(buildHtml(_404.render().html, ''));
 });
 
 exports.app = functions.https.onRequest(server);
@@ -135,7 +149,7 @@ exports.submitPost = functions.https.onCall(async (data, context) => {
         const filename = `posts/${randomName}.${mimeTypes.detectExtension(mimeType)}`;
         const file = admin.storage().bucket().file(filename);
         await file.save(imageBuffer, { contentType: 'image/jpeg' });
-        const photoURL = await file.getSignedUrl({ action: 'read', expires: '03-09-2491' })[0];
+        const photoURL = await file.getSignedUrl({ action: 'read', expires: '03-09-2491' }).then(urls => urls[0]);
 
         return await firestore.collection('posts').add({
             author: username,
