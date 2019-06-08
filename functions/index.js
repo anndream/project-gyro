@@ -16,6 +16,7 @@ function buildHtml(html, head) {
         <link href="https://fonts.googleapis.com/css?family=Nunito+Sans:200,400&display=swap" rel="stylesheet">
         <link rel="stylesheet" type="text/css" href="/styles.css">
         <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+        <meta name="google-site-verification" content="fCLLPyTv6aBhQ8qoxgh8rUxeBcejIkJIfF_MOGGJKis" />
         <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
         <script src="/__/firebase/6.1.1/firebase-app.js"></script>
         <script src="/__/firebase/6.1.1/firebase-auth.js"></script>
@@ -110,7 +111,7 @@ server.get('/user/:username', async function (req, res) {
         const { html, head } = User.render({ ...profile, posts, url: `${req.protocol}://${req.get('host')}${req.originalUrl}` });
         res.send(buildHtml(html, head));
     }
-    catch {
+    catch (error) {
         res.status(404).send(buildHtml(_404.render().html, ''));
     }
 });
@@ -122,7 +123,7 @@ server.get('/post/:id', async function (req, res) {
         const { html, head } = Post.render({ ...post, url: `${req.protocol}://${req.get('host')}${req.originalUrl}` });
         res.send(buildHtml(html, head));
     }
-    catch {
+    catch (error) {
         res.status(404).send(buildHtml(_404.render().html, ''));
     }
 });
