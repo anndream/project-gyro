@@ -64,12 +64,17 @@ server.get('/submit', function (req, res) {
 
 server.get('/user/:username', async function (req, res) {
     let profile = null;
+    let posts = [];
     try {
         const queries = await firestore.collection('users').where('username', '==', req.params.username).get();
+        posts = await firestore.collection('posts').where('author', '==', req.params.username)
+            .limit(5).get().
+            then(col => col.docs.map(doc => {return {...doc.data(), id: doc.id}}));
+
         profile = queries.docs[0].data();
     }
     finally {
-        const { html, head } = User.render({ ...profile, url: `${req.protocol}://${req.get('host')}${req.originalUrl}` });
+        const { html, head } = User.render({ ...profile, posts, url: `${req.protocol}://${req.get('host')}${req.originalUrl}` });
         res.send(buildHtml(html, head));
     }
 });
@@ -120,22 +125,22 @@ exports.submitPost = functions.https.onCall(async (data, context) => {
     }
     else {
         const { username } = await firestore.collection('users').doc(context.auth.uid).get().then(doc => doc.data());
-        const image = data.image;
 
-        const bucket = admin.storage().bucket();
         const randomName = Math.random().toString(36).substring(2, 12);
 
-        const mimeType = image.match(/data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+).*,.*/)[1];
-        const base64EncodedImageString = image.replace(/^data:image\/\w+;base64,/, '');
+        const mimeType = data.image.match(/data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+).*,.*/)[1];
+        const base64EncodedImageString = data.image.replace(/^data:image\/\w+;base64,/, '');
         const imageBuffer = new Buffer(base64EncodedImageString, 'base64');
 
-        const file = bucket.file(`posts/${randomName}.${mimeTypes.detectExtension(mimeType)}`);
+        const filename = `posts/${randomName}.${mimeTypes.detectExtension(mimeType)}`;
+        const file = admin.storage().bucket().file(filename);
         await file.save(imageBuffer, { contentType: 'image/jpeg' });
-        const filename = await file.getSignedUrl({ action: 'read', expires: '03-09-2491' });
+        const photoURL = await file.getSignedUrl({ action: 'read', expires: '03-09-2491' })[0];
 
         return await firestore.collection('posts').add({
             author: username,
-            photoURL: filename[0],
+            photoURL,
+            filename,
             title: data.name || 'Post'
         }).then(r => {
             return { success: true, id: r.id };

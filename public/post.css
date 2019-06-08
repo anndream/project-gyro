@@ -1,3 +1,7 @@
 div.post-page {
     width: max-content;
 }
+
+div.post-page > img {
+    width: 100%;
+}

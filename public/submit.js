@@ -14,7 +14,6 @@ function submit() {
         }
         else {
             addImage({name: postName, image: base64image}).then(result => {
-                console.log(result);
                 window.location.replace(`/post/${result.id}`);
             });
         }

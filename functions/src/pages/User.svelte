@@ -10,7 +10,16 @@
         <h3>{username}</h3>
         <button class="sign-in">loading</button>
     </div>
-    <div class="posts"></div> <!-- for later-->
+    <div class="posts">
+        {#each posts as { title, photoURL, id}}
+	        <div class="post">
+                <h3><a href="/post/{id}">{title}</a></h3>
+                <img src={photoURL} alt={title}>
+            </div>
+        {:else}
+	        <p>{username} has no posts</p>
+        {/each}
+    </div>
 </div>
 
 <svelte:head>
