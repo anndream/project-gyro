@@ -7,3 +7,7 @@
         <button class="sign-in">loading</button>
     </nav>
 </header>
+
+<svelte:head>
+    <link rel="stylesheet" type="text/css" href="/header.css">
+</svelte:head>

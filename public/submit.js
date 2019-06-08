@@ -7,10 +7,13 @@ function submit() {
     const postName = document.getElementById('post-name').value;
     const file = document.getElementById('post-image-file').files[0];
 
-    if (file || postName == '') {
+    if (file && postName !== '') {
         // discard if it is more than 9mb 
         if (file.size > 9000000) {
             alert('File size is too large. Project Gyro allows images under 9mb');
+        }
+        else if (!firebase.auth().currentUser) {
+            alert('You must be logged into an account to post');
         }
         else {
             addImage({name: postName, image: base64image}).then(result => {

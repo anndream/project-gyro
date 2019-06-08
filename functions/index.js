@@ -15,9 +15,20 @@ function buildHtml(html, head) {
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
         <link href="https://fonts.googleapis.com/css?family=Nunito+Sans:200,400&display=swap" rel="stylesheet">
         <link rel="stylesheet" type="text/css" href="/styles.css">
+        <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
         <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
         <script src="/__/firebase/6.1.1/firebase-app.js"></script>
         <script src="/__/firebase/6.1.1/firebase-auth.js"></script>
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-141711670-1"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            
+            gtag('config', 'UA-141711670-1');
+        </script>
+
         <script defer src="/auth.js"></script>
         <script>
             const firebaseConfig = { apiKey: "AIzaSyBmJIhDo8W76jzF6GgvwqQ0HAycRuGVF9A", authDomain: "project-gyro.firebaseapp.com", databaseURL: "https://project-gyro.firebaseio.com", projectId: "project-gyro", storageBucket: "project-gyro.appspot.com", messagingSenderId: "99361186654", appId: "1:99361186654:web:534ea35f0038d280" };
@@ -48,6 +59,7 @@ const User = require('./src/pages/User.svelte').default;
 const Users = require('./src/pages/Users.svelte').default;
 const Submit = require('./src/pages/Submit.svelte').default;
 const Post = require('./src/pages/Post.svelte').default;
+const Posts = require('./src/pages/Posts.svelte').default;
 const _404 = require('./src/pages/404.svelte').default;
 
 // Automatically allow cross-origin requests
@@ -64,10 +76,25 @@ server.get('/submit', function (req, res) {
 });
 
 server.get('/users', async function (req, res) {
-    const page = Math.abs(req.query.page)  || 1;
-    const users = await firestore.collection('users').limit(10).offset((page - 1) * 10).get().then(r => r.docs.map(doc => doc.data()));
-    const { html, head } = Users.render({users, page: page});
-    res.send(buildHtml(html, head));
+    try {
+        const page = req.query.page || 1;
+        const users = await firestore.collection('users').limit(10).offset((page - 1) * 10).get().then(r => r.docs.map(doc => doc.data()));
+        const { html, head } = Users.render({ users, page });
+        res.send(buildHtml(html, head));
+    } catch (error) {
+        res.status(404).send(buildHtml(_404.render().html, ''));
+    }
+});
+
+server.get('/posts', async function (req, res) {
+    try {
+        const page = req.query.page || 1;
+        const posts = await firestore.collection('posts').limit(12).offset((page - 1) * 10).get().then(r => r.docs.map(doc => doc.data()));
+        const { html, head } = Posts.render({ posts, page });
+        res.send(buildHtml(html, head));
+    } catch (error) {
+        res.status(404).send(buildHtml(_404.render().html, ''));
+    }
 });
 
 server.get('/user/:username', async function (req, res) {
@@ -158,7 +185,7 @@ exports.submitPost = functions.https.onCall(async (data, context) => {
             title: data.name || 'Post'
         }).then(r => {
             return { success: true, id: r.id };
-        }).catch(erro => {
+        }).catch(error => {
             return { success: false };
         });
     }

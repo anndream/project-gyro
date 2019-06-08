@@ -13,13 +13,14 @@
             </div>
         {:else}
 	        <p>No users on this page</p>
-            <a href="/users?page={page - 1}">Previous page</a>
         {/each}
     </div>
-    {#if page !== 1 && users.length !== 0}
+    {#if page !== 1}
         <a href="/users?page={page - 1}">Previous page</a>
     {/if}
-    <a href="/users?page={page + 1}">Next Page</a>
+    {#if users.length === 10}
+        <a href="/users?page={page + 1}">Next Page</a>
+    {/if}
 </div>
 
 <svelte:head>
