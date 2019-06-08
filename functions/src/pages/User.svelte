@@ -8,6 +8,7 @@
     <div class="profile">
         <img src={photoURL} alt="{username}'s profile picture">
         <h3>{username}</h3>
+        <button class="sign-in">loading</button>
     </div>
     <div class="posts"></div> <!-- for later-->
 </div>
@@ -18,5 +19,5 @@
 	<meta property="og:type" content="website" />
 	<meta property="og:url" content={url} />
 	<meta property="og:image" content={photoURL} />
-	<meta property="og:description" content="View {username}'s account on Project Gyro'" />
+	<meta property="og:description" content="View {username}'s account on Project Gyro" />
 </svelte:head>

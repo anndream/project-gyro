@@ -5,13 +5,10 @@
 <Header/>
 <div class="container">  
     <p> Home </p>
-    <button onclick="login()">Login</button>
-    <button onclick="logout()">Logout</button>
-    <pre id="user"></pre>
+    <button class="sign-in">loading</button>
 </div>
 
 <svelte:head>
-    <script src="/__/firebase/6.1.1/firebase-auth.js"></script>
-    <script src="/__/firebase/6.1.1/firebase-firestore.js"></script>
-    <script defer src="/auth.js"></script>
+	<meta property="og:title" content="Project Gyro" />
+	<meta property="og:type" content="website" />
 </svelte:head>

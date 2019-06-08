@@ -18,3 +18,9 @@ header > nav > a {
     margin-left: 6px;
     text-decoration: none;
 }
+
+header > nav > button {
+    border: none;
+    font-family: inherit;
+    font-size: inherit;
+}

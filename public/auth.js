@@ -9,20 +9,19 @@ function logout() {
     firebase.auth().signOut();
 }
 
-firebase.auth().onAuthStateChanged(async function (user) {
-    let userValue = null;
-    if (user) {
-        if (Cookies.get('user') === undefined || Cookies.get('user') === "null") {
-            const userObserver = await firebase.firestore().collection('users').doc(user.uid).onSnapshot(function (doc) {
-                console.log(doc);
-                if (doc.data().username !== undefined) {
-                    userValue = { ...doc.data(), uid: doc.id };
-                    userObserver(); //cancel observer
-                }
-            });
-        }
-    }
-    Cookies.set('user', userValue);
-    document.getElementById('user').innerHTML = JSON.stringify(userValue);
+firebase.auth().onAuthStateChanged(function (user) {
+    const buttons = document.getElementsByClassName("sign-in");
 
+    Array.from(buttons).forEach(function (button) {
+        if (user) {
+            button.innerHTML = `Sign Out Of ${user.displayName}`;
+            button.addEventListener('click', logout);
+            button.removeEventListener('click', login);
+        }
+        else {
+            button.innerHTML = 'Sign In';
+            button.addEventListener('click', login);
+            button.removeEventListener('click', logout);
+        }
+    });
 });
