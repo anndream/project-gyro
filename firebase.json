@@ -3,13 +3,14 @@
         "public": "public",
         "rewrites": [
             {
-                "source": "!/@(js|css)/**",
+                "source": "!/@(js|css|ico)/**",
                 "function": "app"
             }
         ],
         "ignore": [
             "firebase.json",
-            "**/node_modules/**"
+            "functions/project-gyro-admin-key.json",
+            "**/node_modules/**" 
         ]
     }
 }

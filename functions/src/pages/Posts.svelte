@@ -19,7 +19,7 @@
     {#if page !== 1}
         <a href="/posts?page={page - 1}">Previous page</a>
     {/if}
-    {#if posts.length === 10}
+    {#if posts.length === 12}
         <a href="/posts?page={page + 1}">Next Page</a>
     {/if}
 </div>

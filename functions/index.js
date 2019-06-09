@@ -90,7 +90,7 @@ server.get('/users', async function (req, res) {
 server.get('/posts', async function (req, res) {
     try {
         const page = req.query.page || 1;
-        const posts = await firestore.collection('posts').limit(12).offset((page - 1) * 10).get().then(r => r.docs.map(doc => doc.data()));
+        const posts = await firestore.collection('posts').limit(12).offset((page - 1) * 10).get().then(r => r.docs.map(doc => ({ ...doc.data(), id: doc.id })));
         const { html, head } = Posts.render({ posts, page });
         res.send(buildHtml(html, head));
     } catch (error) {
@@ -104,8 +104,8 @@ server.get('/user/:username', async function (req, res) {
     try {
         const queries = await firestore.collection('users').where('username', '==', req.params.username).get();
         posts = await firestore.collection('posts').where('author', '==', req.params.username)
-            .limit(5).get().
-            then(col => col.docs.map(doc => { return { ...doc.data(), id: doc.id } }));
+            .limit(9).get().
+            then(col => col.docs.map(doc => ({ ...doc.data(), id: doc.id })));
 
         profile = queries.docs[0].data();
         const { html, head } = User.render({ ...profile, posts, url: `${req.protocol}://${req.get('host')}${req.originalUrl}` });
@@ -119,7 +119,7 @@ server.get('/user/:username', async function (req, res) {
 server.get('/post/:id', async function (req, res) {
     let post = null;
     try {
-        post = await firestore.collection('posts').doc(req.params.id).get().then(doc => doc.data());
+        post = await firestore.collection('posts').doc(req.params.id).get().then(doc => ({...doc.data(), id: doc.id}));
         const { html, head } = Post.render({ ...post, url: `${req.protocol}://${req.get('host')}${req.originalUrl}` });
         res.send(buildHtml(html, head));
     }
@@ -189,5 +189,23 @@ exports.submitPost = functions.https.onCall(async (data, context) => {
         }).catch(error => {
             return { success: false };
         });
+    }
+});
+
+exports.deletePost = functions.https.onCall(async (data, context) => {
+    try {
+        const { username } = await firestore.collection('users').doc(context.auth.uid).get().then(doc => doc.data());
+        const { author, filename } = await firestore.collection('posts').doc(data.postID).get().then(doc => doc.data());
+        if (!context.auth || username !== author) {
+            return { error: 'You do not have permission to delete this post' };
+        }
+        else {
+            await admin.storage().bucket().file(filename).delete();
+            return await firestore.collection('posts').doc(data.postID).delete()
+                .then(() => ({error: null}))
+                .catch(() => ({ error: 'An error occurred' }));
+        }
+    } catch (error) {
+        return { error: 'An error occurred' };
     }
 });
